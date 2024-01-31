@@ -210,7 +210,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         //BORRAR TAREA + Añadir en XML android:onClick="borrarTarea"
-        public void borrarTarea(View view){ //El view es el botón clickeado
+        public void borrarTarea(View view){ //El view es el botón clickeado, que ya está a la escucha desde el XML
             View parent = (View) view.getParent(); //del view=botón obtenemos el padre
             //Mediante el padre consigo el hijo, es decir el TextView= textViewTarea
             // Ella lo llama "nombreTarea" cuidado por si da error
@@ -236,28 +236,28 @@ public class MainActivity extends AppCompatActivity {
 
     //ACTUALIZAR TAREA
     public void updateTarea(View view){
-        //Hay que meterle un dialog, pero en lugar de estar vacío debería
-        //tener el texto a editar.
-        //AlertDialog dialog = new AlertDialog.Builder(this)
-        //.set() actualiza todo el documento y .update() solo algunos campos.
-
         View parent = (View) view.getParent();
 
+        //recoge el texto modificado
         TextView tareaTextView = parent.findViewById(R.id.textViewTarea);
-
         String tarea = tareaTextView.getText().toString();
 
-
+        //posición de la tarea en el array listaTareas
         int posicion = listaTareas.indexOf(tarea);
 
         //Alert para el cuadro de diálogo donde se modifican los datos
+        //Hay que meterle un dialog, pero en lugar de estar vacío debería
+        //tener el texto a editar.
 
-        final EditText taskEditText = new EditText(this);
+        //Esta es la caja de texto para el alert
+        EditText taskEditText = new EditText(this);
+        //dentro le meto el mensaje a modificar que he cogido antes.
+        taskEditText.setText(tarea);
 
         AlertDialog dialog = new AlertDialog.Builder(this)
                 .setTitle("Modificar tarea")
                 .setMessage("¿Cómo quieres modificar la tarea?")
-                .setMessage(tarea)
+                //.setMessage(tarea) así mostraría el texto editado como un mensaje fijo
                 .setView(taskEditText)
                 //los dos botones, el positive y el negative + listeners. Sobreescribimos el métood de positive.
                 .setPositiveButton("modificar", new DialogInterface.OnClickListener() {
@@ -266,14 +266,18 @@ public class MainActivity extends AppCompatActivity {
 
 
                         //Creo primero las variables. Las obtengo de la view del cuadro de dialogo creada más arriba.
+                        //Esta variable obtiene la caja de texto, ya modificada
                         String miTarea = taskEditText.getText().toString();
-                        // Add a new document with a generated id.
+
+
                         Map<String, Object> data = new HashMap<>(); //El documento
                         data.put("nombreTarea", miTarea);
                         data.put("usuario", idUser);
 
-                        db.collection("Tareas").document(listaIdTareas.get(posicion))
-                                .set(data)
+
+                        //.set() actualiza todo el documento y .update() solo algunos campos.
+                        db.collection("Tareas").document(listaIdTareas.get(posicion)).update(data)
+
                                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                                     @Override
                                     public void onSuccess(Void aVoid) {
